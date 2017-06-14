@@ -57,6 +57,7 @@
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
+        <name>origin</name>
         <url>ENTER GIT FOLDER</url>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
@@ -96,6 +97,12 @@ sf.logLevel = None</properties>
     </hudson.tasks.Ant>
   </builders>
   <publishers>
+    <hudson.plugins.git.GitPublisher plugin="git@3.3.0">
+      <configVersion>2</configVersion>
+      <pushMerge>true</pushMerge>
+      <pushOnlyIfSuccess>true</pushOnlyIfSuccess>
+      <forcePush>true</forcePush>
+    </hudson.plugins.git.GitPublisher>
     <jenkins.plugins.slack.SlackNotifier plugin="slack@2.2">
       <baseUrl></baseUrl>
       <teamDomain></teamDomain>
