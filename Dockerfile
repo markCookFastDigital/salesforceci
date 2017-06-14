@@ -5,5 +5,7 @@ COPY jobs/Build_From_GIT_Example/config.xml /usr/share/jenkins/ref/jobs/Build_Fr
 COPY jobs/DestructuveBuild/config.xml /usr/share/jenkins/ref/jobs/DestructuveBuild/config.xml
 COPY jobs/Extract_From_Envorinment/config.xml /usr/share/jenkins/ref/jobs/Extract_From_Envorinment/config.xml
 COPY jobs/Extract_Package_From_Envorinment/config.xml /usr/share/jenkins/ref/jobs/Extract_Package_From_Envorinment/config.xml
+COPY jobs/Pull_and_commit_to_GIT/config.xml /usr/share/jenkins/ref/jobs/Pull_and_commit_to_GIT/config.xml
+COPY jobs/Build_From_GIT_Create_Tag_Example/config.xml /usr/share/jenkins/ref/jobs/Build_From_GIT_Create_Tag_Example/config.xml
 RUN /usr/local/bin/plugins.sh /usr/share/jenkins/plugins.txt
 USER root
