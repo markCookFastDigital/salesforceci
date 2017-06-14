@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.PasswordParameterDefinition>
+          <name>SalesforcePassword</name>
+          <description>The Salesforce Password of the Deployment</description>
+          <defaultValue>{AQAAABAAAAAgei+8TAgNT4+grF9f0bc78TMF3JYO+DTkJv1GH47+LL/zQSZ+JrS2P2SSSG2BhZMp}</defaultValue>
+        </hudson.model.PasswordParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>SalesforceUsername</name>
+          <description>The Salesforce Username</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>SalesforceUrl</name>
+          <description>Login URL&apos;s</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>https://test.salesforce.com</string>
+              <string>https://login.salesforce.com</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>CheckBuild</name>
+          <description>Used to check a build against an environment</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>TestLevel</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>NoTestRun</string>
+              <string>RunLocalTests</string>
+              <string>RunAllTestsInOrg</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Ant plugin="ant@1.4">
+      <targets>-lib
+/var/jenkins_home/CI/ant-salesforce.jar
+-propertyfile
+/var/jenkins_home/CI/build.properties</targets>
+      <antName>jenkinsAnt</antName>
+      <buildFile>/var/jenkins_home/CI/build.xml</buildFile>
+      <properties>sf.username  = $SalesforceUsername
+sf.password = $SalesforcePassword
+sf.serverurl = $SalesforceUrl
+sf.deployFolder = /var/jenkins_home/CI/BuildFile
+sf.checkOnly = $CheckBuild
+sf.testLevel = $TestLevel
+sf.logLevel = None</properties>
+    </hudson.tasks.Ant>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>
