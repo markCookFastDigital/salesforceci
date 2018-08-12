@@ -1,4 +1,4 @@
-FROM jenkins
+FROM jenkins/jenkins:lts
 COPY plugins.txt /usr/share/jenkins/plugins.txt
 COPY jobs/Build_From_Folder/config.xml /usr/share/jenkins/ref/jobs/Build_From_Folder/config.xml
 COPY jobs/Build_From_GIT_Example/config.xml /usr/share/jenkins/ref/jobs/Build_From_GIT_Example/config.xml
