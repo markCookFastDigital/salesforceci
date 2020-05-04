@@ -1,0 +1,222 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Allows dataloader operations from one environment</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>SFDUSER</name>
+          <description>Salesforce username for destination environment</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string></string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.PasswordParameterDefinition>
+          <name>SFDPASS</name>
+          <description>Salesforce username for destination environment</description>
+          <defaultValue>{AQAAABAAAABAv6o/JeZHlmsHixlyoDPAKi+iO4+ASNtq7/q/6PPa/NDJxLjO2DhZV6UR9WpOX9Je8uoSnc7aPW2D+NEwq6w2KKiM7FGQIH9hjYZwGK9Y8Wc=}</defaultValue>
+        </hudson.model.PasswordParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>Fields</name>
+          <description>List of field names in the csv</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>Object</name>
+          <description>Name of the object being inserted</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.FileParameterDefinition>
+          <name>TheCSV</name>
+          <description>Optionally provide the csv of date for the operation. If not provided the one in stored in the svn/git repository will be used</description>
+        </hudson.model.FileParameterDefinition>
+        <hudson.model.FileParameterDefinition>
+          <name>SDLFILE</name>
+          <description>Optionally provide a mapping of Field names to field names in the CSV. If not provided, one will be generated and will assume all fields names in the CSV are identical to the field names in the Salesforce Org</description>
+        </hudson.model.FileParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>Endpoint</name>
+          <description>Which endpoint the environment uses (i.e. is it production or sandbox)</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>https://test.salesforce.com</string>
+              <string>https://login.salesforce.com</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>Operation</name>
+          <description>What operation is being performed through dataloader
+For Delete,Upsert,Insert and Update a CSV must be provided</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>insert</string>
+              <string>extract</string>
+              <string>delete</string>
+              <string>upsert</string>
+              <string>update</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>WhereClause</name>
+          <description>Used for Extract only , a where clause written in SOQL to limit which records are returned</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>ExternalID</name>
+          <description>For Upsert operation - The field that should be used as the external Id to match records on</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>ExternalRelationship</name>
+          <description>For Upsert operation (OPTIONAL) - If matching on  a field on an object related to the target object provide the name of the related object</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.SubversionSCM" plugin="subversion@2.9">
+    <locations>
+      <hudson.scm.SubversionSCM_-ModuleLocation>
+        <remote>devBranch/dataFolder</remote>
+        <credentialsId></credentialsId>
+        <local>.</local>
+        <depthOption>infinity</depthOption>
+        <ignoreExternalsOption>false</ignoreExternalsOption>
+      </hudson.scm.SubversionSCM_-ModuleLocation>
+    </locations>
+    <excludedRegions></excludedRegions>
+    <includedRegions></includedRegions>
+    <excludedUsers></excludedUsers>
+    <excludedRevprop></excludedRevprop>
+    <excludedCommitMessages></excludedCommitMessages>
+    <workspaceUpdater class="hudson.scm.subversion.UpdateUpdater"/>
+    <ignoreDirPropChanges>false</ignoreDirPropChanges>
+    <filterChangelog>false</filterChangelog>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>true</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>cp ${JENKINS_HOME}/CI/* -rf . &amp;&amp; cp ${JENKINS_HOME}/workspace/${JOB_NAME}/buildfiles/cleanupBuild/cleanBuildFile.class .</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>mv ${JENKINS_HOME}/workspace/${JOB_NAME}/*.csv ${JENKINS_HOME}/workspace/${JOB_NAME}/generic_cliqJob/read/genericObject.csv || echo &quot;No csv provided in repository&quot;</command>
+    </hudson.tasks.Shell>
+    <org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder plugin="conditional-buildstep@1.3.6">
+      <condition class="org.jenkins_ci.plugins.run_condition.logic.Not" plugin="run-condition@1.0">
+        <condition class="org.jenkins_ci.plugins.run_condition.core.StringsMatchCondition">
+          <arg1>${TheCSV}</arg1>
+          <arg2></arg2>
+          <ignoreCase>false</ignoreCase>
+        </condition>
+      </condition>
+      <buildStep class="hudson.tasks.Shell">
+        <command>cp TheCSV ${JENKINS_HOME}/workspace/${JOB_NAME}/generic_cliqJob/read/genericObject.csv</command>
+      </buildStep>
+      <runner class="org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail" plugin="run-condition@1.0"/>
+    </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
+    <hudson.tasks.Shell>
+      <command>cd dataLoader_jars &amp;&amp; dataloader=&quot;$(ls | grep dataloader | grep .jar | tail -n 1)&quot; &amp;&amp; cp $dataloader ../generic_cliqJob/ &amp;&amp; cp $dataloader .. &amp;&amp; cd ..</command>
+    </hudson.tasks.Shell>
+    <org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder plugin="conditional-buildstep@1.3.6">
+      <condition class="org.jenkins_ci.plugins.run_condition.core.StringsMatchCondition" plugin="run-condition@1.0">
+        <arg1>$Operation</arg1>
+        <arg2>upsert</arg2>
+        <ignoreCase>false</ignoreCase>
+      </condition>
+      <buildStep class="hudson.tasks.Shell">
+        <command>dataloader=&quot;$(ls | grep dataloader | grep .jar)&quot; &amp;&amp; password=&quot;$(java -cp $dataloader com.salesforce.dataloader.security.EncryptionUtil -e $SFDPASS | tail -n 1)&quot; &amp;&amp; java GenerateCliqScript -f $Fields -sp NOTUSED -su NOTUSED -o $Object -du $SFDUSER -dp $password -l /generic_cliqJob/ -e $Endpoint -dlv $dataloader -upsertId $ExternalID -upsertR $ExternalRelationship</command>
+      </buildStep>
+      <runner class="org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail" plugin="run-condition@1.0"/>
+    </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
+    <org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder plugin="conditional-buildstep@1.3.6">
+      <condition class="org.jenkins_ci.plugins.run_condition.core.StringsMatchCondition" plugin="run-condition@1.0">
+        <arg1>$Operation</arg1>
+        <arg2>extract</arg2>
+        <ignoreCase>false</ignoreCase>
+      </condition>
+      <buildStep class="hudson.tasks.Shell">
+        <command>  dataloader=&quot;$(ls | grep dataloader | grep .jar)&quot; &amp;&amp; password=&quot;$(java -cp $dataloader com.salesforce.dataloader.security.EncryptionUtil -e $SFDPASS | awk &apos;{print $NF}&apos;)&quot; &amp;&amp; java GenerateCliqScript -f $Fields -sp $password -su $SFDUSER -o $Object -du $SFDUSER -dp $password -l /generic_cliqJob/ -e $Endpoint -dlv $dataloader -w $WhereClause</command>
+      </buildStep>
+      <runner class="org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail" plugin="run-condition@1.0"/>
+    </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
+    <org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder plugin="conditional-buildstep@1.3.6">
+      <condition class="org.jenkins_ci.plugins.run_condition.logic.And" plugin="run-condition@1.0">
+        <conditions>
+          <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+            <condition class="org.jenkins_ci.plugins.run_condition.logic.Not">
+              <condition class="org.jenkins_ci.plugins.run_condition.core.StringsMatchCondition">
+                <arg1>$Operation</arg1>
+                <arg2>extract</arg2>
+                <ignoreCase>false</ignoreCase>
+              </condition>
+            </condition>
+          </org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+          <org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+            <condition class="org.jenkins_ci.plugins.run_condition.logic.Not">
+              <condition class="org.jenkins_ci.plugins.run_condition.core.StringsMatchCondition">
+                <arg1>$Operation</arg1>
+                <arg2>upsert</arg2>
+                <ignoreCase>false</ignoreCase>
+              </condition>
+            </condition>
+          </org.jenkins__ci.plugins.run__condition.logic.ConditionContainer>
+        </conditions>
+      </condition>
+      <buildStep class="hudson.tasks.Shell">
+        <command>dataloader=&quot;$(ls | grep dataloader | grep .jar)&quot; &amp;&amp; password=&quot;$(java -cp $dataloader com.salesforce.dataloader.security.EncryptionUtil -e $SFDPASS | awk &apos;{print $NF}&apos;)&quot; &amp;&amp; java GenerateCliqScript -f $Fields -sp NOTUSED -su NOTUSED -o $Object -du $SFDUSER -dp $password -l /generic_cliqJob/ -e $Endpoint -dlv $dataloader  </command>
+      </buildStep>
+      <runner class="org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail" plugin="run-condition@1.0"/>
+    </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
+    <org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder plugin="conditional-buildstep@1.3.6">
+      <condition class="org.jenkins_ci.plugins.run_condition.logic.Not" plugin="run-condition@1.0">
+        <condition class="org.jenkins_ci.plugins.run_condition.core.StringsMatchCondition">
+          <arg1>${SDLFILE}</arg1>
+          <arg2></arg2>
+          <ignoreCase>false</ignoreCase>
+        </condition>
+      </condition>
+      <buildStep class="hudson.tasks.Shell">
+        <command>cp SDLFILE ${JENKINS_HOME}/workspace/${JOB_NAME}/generic_cliqJob/config/object.sdl</command>
+      </buildStep>
+      <runner class="org.jenkins_ci.plugins.run_condition.BuildStepRunner$Fail" plugin="run-condition@1.0"/>
+    </org.jenkinsci.plugins.conditionalbuildstep.singlestep.SingleConditionalBuilder>
+    <hudson.tasks.Shell>
+      <command>chmod 777 generic_cliqJob/*.sh</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>touch log.txt &amp;&amp; script=&quot;${Operation}Object.sh&quot; &amp;&amp; generic_cliqJob/$script &gt; log.txt || cat log.txt</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>rm -rf buildfiles dataload* dataL* *.class *.java TheCSV SDLFILE sample* Schedul* &amp;&amp; cp generic_cliqJob/log/* . &amp;&amp; cp generic_cliqJob/read/* . &amp;&amp; cp generic_cliqJob/config/* . &amp;&amp; rm -rf generic_cliqJob</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>set +x &amp;&amp; echo &quot;==================================================================&quot; &amp;&amp; echo &quot;The build has completed.&quot; &amp;&amp; cat myFile.txt | grep &apos;There are [0-9]* successes and [0-9]* errors&apos; -o ** 
+</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>set +x &amp;&amp; successes=&quot;$(ls | grep success)&quot; &amp;&amp; errors=&quot;$(ls | grep error)&quot; &amp;&amp; properties=&quot;$(ls | grep .properties)&quot; &amp;&amp; url=&quot;${JOB_URL}ws/&quot; &amp;&amp; \
+printf &quot;The success file is available at $url$successes \n\n The errors file is available at $url$errors \n\n The properties of this operation are available at $url$properties \n\n&quot; &amp;&amp; \
+echo &quot;The csv of records is availabe at ${url}genericObject.csv&quot; &amp;&amp; \
+echo &quot;==================================================================&quot; &amp;&amp; rm *.txt</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.34">
+      <deleteDirs>false</deleteDirs>
+      <cleanupParameter></cleanupParameter>
+      <externalDelete></externalDelete>
+    </hudson.plugins.ws__cleanup.PreBuildCleanup>
+  </buildWrappers>
+</project>
