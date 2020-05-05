@@ -6,7 +6,6 @@ COPY jobs /usr/share/jenkins/ref/jobs
 COPY CI/* /usr/share/jenkins/ref/CI/
 RUN /usr/local/bin/plugins.sh /usr/share/jenkins/plugins.txt
 USER root
-# For Use of SFDX CLI uncomment below before building
 # RUN mkdir sfdx-cli
 # RUN tar xJf sfdx-linux-amd64.tar.xz -C sfdx-cli --strip-components 1
 # RUN ./sfdx-cli/install

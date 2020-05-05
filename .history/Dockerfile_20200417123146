@@ -1,0 +1,18 @@
+FROM jenkins/jenkins:lts
+# COPY jobs/Build_From_Folder/config.xml /usr/share/jenkins/ref/jobs/Build_From_Folder/config.xml
+# COPY jobs/Build_From_GIT_Example/config.xml /usr/share/jenkins/ref/jobs/Build_From_GIT_Example/config.xml
+# COPY jobs/DestructiveBuild/config.xml /usr/share/jenkins/ref/jobs/DestructiveBuild/config.xml
+# COPY jobs/Extract_From_Environment/config.xml /usr/share/jenkins/ref/jobs/Extract_From_Environment/config.xml
+# COPY jobs/Extract_Package_From_Environment/config.xml /usr/share/jenkins/ref/jobs/Extract_Package_From_Environment/config.xml
+# COPY jobs/Pull_and_commit_to_GIT/config.xml /usr/share/jenkins/ref/jobs/Pull_and_commit_to_GIT/config.xml
+# COPY jobs/Build_From_GIT_Create_Tag_Example/config.xml /usr/share/jenkins/ref/jobs/Build_From_GIT_Create_Tag_Example/config.xml
+COPY CI/* /usr/share/jenkins/ref/CI/
+COPY jobs/* /usr/share/jenkins/ref/jobs/
+# COPY plugins.txt /usr/share/jenkins/plugins.txt
+# RUN   /usr/local/bin/install-plugins.sh  /usr/share/jenkins/plugins.txt
+RUN cat /usr/local/bin/install-plugins.sh
+RUN ls /usr/share/jenkins/ref/
+COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
+RUN /usr/local/bin/install-plugins.sh < /usr/share/jenkins/ref/plugins.txt
+USER root
+

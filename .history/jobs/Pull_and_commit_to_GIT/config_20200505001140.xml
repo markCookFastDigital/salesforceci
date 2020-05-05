@@ -1,0 +1,133 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.5.13">
+      <gitLabConnection></gitLabConnection>
+    </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.31">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.PasswordParameterDefinition>
+          <name>SalesforcePassword</name>
+          <description>The Salesforce Password of the Deployment</description>
+          <defaultValue>{AQAAABAAAABQkQH+xOL1dyYyt+p5XRPZQxJ0Ga2EejImViBRciAe24YH47sIf/e+PBL0VAPIDEwuGCttrTe+VKAtPsJFIUC/5xievdanFQuIe1c9iLqu15x1bzLsGk3nXzGF6vYuIP0T}</defaultValue>
+        </hudson.model.PasswordParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>SalesforceUsername</name>
+          <description>The Salesforce Username</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>SalesforceUrl</name>
+          <description>Login URL&apos;s</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>https://test.salesforce.com</string>
+              <string>https://login.salesforce.com</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@0.9.12">
+          <name>feature</name>
+          <description></description>
+          <uuid>d80b3ec8-7379-4d34-8131-80077987f3aa</uuid>
+          <type>PT_BRANCH</type>
+          <branch></branch>
+          <tagFilter>*</tagFilter>
+          <branchFilter>origin/(.*)</branchFilter>
+          <sortMode>NONE</sortMode>
+          <defaultValue></defaultValue>
+          <selectedValue>NONE</selectedValue>
+          <quickFilterEnabled>false</quickFilterEnabled>
+          <listSize>5</listSize>
+        </net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition>
+        <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@0.9.12">
+          <name>target</name>
+          <description></description>
+          <uuid>d960597f-a26e-47ad-a934-44cfe8413c48</uuid>
+          <type>PT_BRANCH</type>
+          <branch>origin/(.*)</branch>
+          <tagFilter>*</tagFilter>
+          <branchFilter>.*</branchFilter>
+          <sortMode>NONE</sortMode>
+          <defaultValue></defaultValue>
+          <selectedValue>NONE</selectedValue>
+          <quickFilterEnabled>false</quickFilterEnabled>
+          <listSize>5</listSize>
+        </net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.2.2">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <name>origin</name>
+        <url>git@github.com:dsl12/smartcloudGenerationDemo.git</url>
+        <credentialsId>f02e7e59-47c8-4102-912e-a3eb89713169</credentialsId>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>${feature}</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions>
+      <hudson.plugins.git.extensions.impl.CleanBeforeCheckout>
+        <deleteUntrackedNestedRepositories>false</deleteUntrackedNestedRepositories>
+      </hudson.plugins.git.extensions.impl.CleanBeforeCheckout>
+    </extensions>
+  </scm>
+  <quietPeriod>600</quietPeriod>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>mkdir src2</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Ant plugin="ant@1.11">
+      <targets>-lib
+/var/jenkins_home/CI/ant-salesforce.jar
+-propertyfile
+/var/jenkins_home/CI/build.properties retrieveUnpackaged</targets>
+      <antName>(Default)</antName>
+      <buildFile>/var/jenkins_home/CI/build.xml</buildFile>
+      <properties>sf.username  = $SalesforceUsername
+sf.password = $SalesforcePassword
+sf.serverurl = $SalesforceUrl
+sf.retrieveUnpackaged = ${WORKSPACE}/src2
+sf.package =${WORKSPACE}/src/package.xml
+sf.checkOnly = $CheckBuild
+sf.testLevel = $TestLevel
+sf.logLevel = None</properties>
+    </hudson.tasks.Ant>
+    <hudson.tasks.Shell>
+      <command>git checkout origin/$target &amp;&amp; cp -rf src2/* src/ &amp;&amp; git add src &amp;&amp; git commit -m &apos;Post pulldown commit&apos; &amp;&amp; git push -u origin HEAD</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.11.2"/>
+  </buildWrappers>
+</project>
