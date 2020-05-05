@@ -4,7 +4,6 @@
   <description></description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.0.15"/>
     <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.5.13">
       <gitLabConnection></gitLabConnection>
     </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
@@ -17,7 +16,7 @@
         <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@0.9.12">
           <name>feature</name>
           <description></description>
-          <uuid>70089360-d6ae-4795-ba9a-5b35a3f9b36a</uuid>
+          <uuid>c2294211-f5c4-4471-8809-38a8b5419c5a</uuid>
           <type>PT_BRANCH</type>
           <branch></branch>
           <tagFilter>*</tagFilter>
@@ -31,7 +30,7 @@
         <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@0.9.12">
           <name>parentBranch</name>
           <description>By Default, develop. The branch from which your &apos;feature&apos; branched off</description>
-          <uuid>0a0c4124-6d1a-488d-a4f1-8880f07644e3</uuid>
+          <uuid>a39232f3-37fd-4f99-a402-480b987e1fc9</uuid>
           <type>PT_BRANCH</type>
           <branch></branch>
           <tagFilter>*</tagFilter>
@@ -45,7 +44,7 @@
         <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@0.9.12">
           <name>destination</name>
           <description></description>
-          <uuid>29682d82-a2e0-459c-a4f0-71228334a58e</uuid>
+          <uuid>79f67604-8052-469d-a67f-c260ecd5ef37</uuid>
           <type>PT_BRANCH</type>
           <branch></branch>
           <tagFilter>*</tagFilter>
@@ -98,22 +97,22 @@
       <command>git merge-base origin/${feature} origin/${parentBranch} &gt; parentBranch.txt</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
+      <command>git diff --name-only --diff-filter=A $(cat parentBranch.txt) &gt; addedFiles.txt </command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>git diff --name-only --diff-filter=M $(cat parentBranch.txt) &gt; changedFiles.txt </command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>git diff --name-only  $(cat parentBranch.txt) &gt; filesToIncludeInBuild.txt</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
       <command>git checkout -B ${feature}-${destination}-merge  &amp;&amp;  echo &apos;*.DS_Store&apos; &gt; .gitIgnore &amp;&amp; echo ${feature}-${destination}-merge</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>git diff --name-only --diff-filter=A origin/${feature} $(cat parentBranch.txt) &gt; addedFiles.txt </command>
+      <command>git merge --no-edit --no-commit -s recursive -Xtheirs origin/${destination}</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>git diff --name-only --diff-filter=M origin/${feature} $(cat parentBranch.txt) &gt; changedFiles.txt </command>
-    </hudson.tasks.Shell>
-    <hudson.tasks.Shell>
-      <command>git diff --name-only origin/${feature} $(cat parentBranch.txt) &gt; filesToIncludeInBuild.txt</command>
-    </hudson.tasks.Shell>
-    <hudson.tasks.Shell>
-      <command>git merge --no-edit --no-commit -s recursive -Xtheirs origin/${destination} </command>
-    </hudson.tasks.Shell>
-    <hudson.tasks.Shell>
-      <command>node app.js origin/${feature} $(cat parentBranch.txt) origin/${destination} false</command>
+      <command>node --max-old-space-size=4096 app.js origin/${feature} $(cat parentBranch.txt) origin/${destination} false</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
       <command>git add src/* &amp;&amp; git commit -m &apos;Jenkins commit&apos;</command>
@@ -125,16 +124,19 @@
       <command>git push -u origin HEAD</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>git checkout -B ${feature}-${destination}-Relase &amp;&amp; echo ${feature}-${destination}-Relase </command>
+      <command>git checkout -B ${feature}-${destination}-Release</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>node app.js origin/${feature} $(cat parentBranch.txt) origin/${destination} true &amp;&amp; cat src/objects/Account.object</command>
+      <command>node --max-old-space-size=4096 app.js origin/${feature} $(cat parentBranch.txt) origin/${destination} true</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>cp /var/jenkins_home/CI/cleanBuildFile.class . &amp;&amp; cat filesToIncludeInBuild.txt &amp;&amp; java cleanBuildFile yes &amp;&amp; mv package.xml src &amp;&amp; ls &amp;&amp; ls src</command>
+      <command>cp /var/jenkins_home/CI/cleanBuildFile.class . &amp;&amp; java cleanBuildFile yes </command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>git add src/package.xml &amp;&amp; git commit -am&apos; Creating Release&apos; &amp;&amp; git push -u origin HEAD</command>
+      <command>mv package.xml src &amp;&amp; ls &amp;&amp; ls src &amp;&amp; git add src/package.xml</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>git commit -am&apos; Creating Release&apos; &amp;&amp; git push -u origin HEAD</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>

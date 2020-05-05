@@ -32,6 +32,8 @@ public class cleanBuildFile {
     public static ArrayList<String> lowerCaseFiles;
     public static ArrayList<String> actualFiless = new ArrayList<String>();
 
+    public static ArrayList<String> filesToWarn = new ArrayList<String>();
+
     public static String path;
     public static HashMap<String,String> fileToMeta;
     private static boolean genPack;
@@ -189,7 +191,12 @@ public class cleanBuildFile {
         cleanBuildFile.showFiles(arrstring2);
         if (genPack) {
             generatePackage();
-
+            if (!filesToWarn.isEmpty()) {
+                for (int i = 0; i < filesToWarn.size() - 1; i++) {
+                    System.err.println("PACKAGE XML ENTRY COULD NOT BE GENERATATED FOR : " + filesToWarn.get(i) + "  - PLEASE UPDATE MANUALLY BEFORE DEPLOYING");
+                    System.out.println("PACKAGE XML ENTRY COULD NOT BE GENERATATED FOR : " + filesToWarn.get(i) + "  - PLEASE UPDATE MANUALLY BEFORE DEPLOYING");
+                }
+            }
         }
     }
 
@@ -249,8 +256,8 @@ public class cleanBuildFile {
                         System.out.println("METADATA TYPE FOR " + theExtension + " NOT DEFINED");
                         System.err.println("ERROR GENERATING PACKAGE.XML.");
                         System.err.println("METADATA TYPE FOR " + theExtension + " NOT DEFINED");
-
-                        return;
+                        filesToWarn.add(aFile);
+                        continue;
                     }
                     theName.appendChild(doc.createTextNode(fileToMeta.get(theExtension)));
                     theElement.appendChild(theName);
@@ -329,7 +336,6 @@ public class cleanBuildFile {
             }
             
             if (fileNames.contains(file.getName().toLowerCase())) {
-                actualFiless.add(file.getName());
                 continue;
             }
             file.delete();
