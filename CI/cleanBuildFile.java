@@ -1,3 +1,4 @@
+
 /*
  * Decompiled with CFR 0_118.
  */
@@ -10,7 +11,9 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.parsers.DocumentBuilder;
@@ -31,7 +34,7 @@ public class cleanBuildFile {
     public static ArrayList<String> listOfFiles;
     public static ArrayList<String> lowerCaseFiles;
     public static ArrayList<String> actualFiless = new ArrayList<String>();
-
+    public static ArrayList<String> fileNames = new ArrayList<String>();
     public static ArrayList<String> filesToWarn = new ArrayList<String>();
 
     public static String path;
@@ -134,6 +137,8 @@ public class cleanBuildFile {
         fileToMeta.put("settings","Settings");
         fileToMeta.put(".actionLinkGroupTemplate","ActionLinkGroupTemplate");
         fileToMeta.put("analyticsnapshot","AnalyticSnapshot");
+        fileToMeta.put("snapshot","AnalyticSnapshot");
+
         fileToMeta.put("appMenu","AppMenu");
         fileToMeta.put("assignmentRules","AssignmentRule");
         fileToMeta.put("authprovider","AuthProvider");
@@ -176,10 +181,10 @@ public class cleanBuildFile {
 
 
         try {
-            System.out.println(path + pathSeperator + "filesToIncludeInBuild.txt");
+            // System.out.println(path + pathSeperator + "filesToIncludeInBuild.txt");
             for (String string : cleanBuildFile.lines = cleanBuildFile.readLines(path + pathSeperator + "filesToIncludeInBuild.txt")) {
-                System.out.println("These are the files that will be included in the build : ");
-                System.out.println(string);
+                // System.out.println("These are the files that will be included in the build : ");
+                // System.out.println(string);
             }
         }
         catch (Exception var1_2) {
@@ -193,11 +198,39 @@ public class cleanBuildFile {
             generatePackage();
             if (!filesToWarn.isEmpty()) {
                 for (int i = 0; i < filesToWarn.size() - 1; i++) {
-                    System.err.println("PACKAGE XML ENTRY COULD NOT BE GENERATATED FOR : " + filesToWarn.get(i) + "  - PLEASE UPDATE MANUALLY BEFORE DEPLOYING");
                     System.out.println("PACKAGE XML ENTRY COULD NOT BE GENERATATED FOR : " + filesToWarn.get(i) + "  - PLEASE UPDATE MANUALLY BEFORE DEPLOYING");
                 }
             }
         }
+    }
+
+    public static HashSet<String> auraFolders = new HashSet<String>();
+
+    public static boolean isAuraFolder(File aFile) {
+        Boolean result = false;
+        Integer lastSlash = aFile.getName().lastIndexOf("/");
+        String folderName = aFile.getName().substring(lastSlash+1);
+
+        for (String s : auraFolders) {
+
+            Integer lastSlash2 = s.lastIndexOf('/');
+            String compFoldName = s.substring(lastSlash2 + 1);
+
+            if (folderName.equals(compFoldName)) {
+                return true;
+            }
+        }
+
+        return result;
+    }
+
+    public static ArrayList<String> processAura(String theString , ArrayList<String> arrayList) {
+        Integer slashIndex = theString.lastIndexOf('/');
+        String foldName = theString.substring(0, slashIndex);
+        auraFolders.add(foldName);
+        arrayList.add(theString);
+
+        return arrayList;
     }
 
     public static String[] readLines(String string) throws IOException {
@@ -210,8 +243,14 @@ public class cleanBuildFile {
 
             if (str.length() == 0) continue;
 
-            arrayList.add(str);
-            arrayList.add(str + "-meta.xml");
+            if (str.contains("/aura/")) {
+                arrayList = processAura(str,arrayList);
+            } else {
+                arrayList.add(str);
+                arrayList.add(str + "-meta.xml");
+            }
+
+            
         }
         bufferedReader.close();
         listOfFiles.addAll(arrayList);
@@ -235,16 +274,21 @@ public class cleanBuildFile {
 
 
             HashMap<String,Element> elementMap = new HashMap<String,Element>();
-
             for (String aFile : actualFiless) {
                 if (aFile.endsWith("-meta.xml")) continue;
 
 
                 String theExtension = getExtension(aFile);
+               
                 if (elementMap.containsKey(theExtension)) {
                     Element theElement = elementMap.get(theExtension);
                     Element newMember = doc.createElement("members");
-                    newMember.appendChild(doc.createTextNode(removeExtension(aFile)));
+                    if (theExtension.contains("report") && !theExtension.contains("reportType")) {
+                        newMember.appendChild(doc.createTextNode(reportMap.get(aFile)));
+                    } else {
+                        newMember.appendChild(doc.createTextNode(removeExtension(aFile)));
+
+                    }
                     theElement.appendChild(newMember);
                     elementMap.put(theExtension,theElement);
 
@@ -253,22 +297,49 @@ public class cleanBuildFile {
                     Element theName = doc.createElement("name");
                     if (!fileToMeta.containsKey(theExtension)) {
                         System.out.println("ERROR GENERATING PACKAGE.XML.");
-                        System.out.println("METADATA TYPE FOR " + theExtension + " NOT DEFINED");
-                        System.err.println("ERROR GENERATING PACKAGE.XML.");
-                        System.err.println("METADATA TYPE FOR " + theExtension + " NOT DEFINED");
+                        System.out.println("METADATA TYPE FOR " + theExtension + " NOT DEFINED    File : "  + aFile);
                         filesToWarn.add(aFile);
                         continue;
                     }
                     theName.appendChild(doc.createTextNode(fileToMeta.get(theExtension)));
                     theElement.appendChild(theName);
                     Element newMember = doc.createElement("members");
-                    newMember.appendChild(doc.createTextNode(removeExtension(aFile)));
+                    if (theExtension.contains("report")) {
+                        newMember.appendChild(doc.createTextNode(reportMap.get(aFile)));
+                    } else {
+                        newMember.appendChild(doc.createTextNode(removeExtension(aFile)));
+
+                    }
                     theElement.appendChild(newMember);
                     elementMap.put(theExtension,theElement);
                 }
 
             }
-//TODO REDO LOWER CASE
+
+            if (!auraFolders.isEmpty()){
+                Element theElement = doc.createElement("types");
+                Element theName = doc.createElement("name");
+                theName.appendChild(doc.createTextNode("AuraDefinitionBundle"));
+                theElement.appendChild(theName);
+
+                for (String aF : auraFolders) {
+                    Integer slashIndex = aF.lastIndexOf('/');
+                    String name = aF.substring(slashIndex+1);
+                    Element newMember = doc.createElement("members");
+                    newMember.appendChild(doc.createTextNode(name));
+                    theElement.appendChild(newMember);
+                    
+
+
+                }
+
+                elementMap.put("js",theElement);
+
+
+            }
+    
+
+            //TODO REDO LOWER CASE
             for (String key : elementMap.keySet()) {
                 Element theElement = elementMap.get(key);
                 theElement.appendChild(theElement.removeChild(theElement.getFirstChild()));
@@ -309,6 +380,8 @@ public class cleanBuildFile {
         return aFile.substring(0,i);
     }
 
+    public static HashMap<String,String> reportMap = new HashMap<String,String>();
+
 
     public static void showFiles(File[] arrfile) {
         lowerCaseFiles = (ArrayList<String>) listOfFiles.clone();
@@ -320,7 +393,7 @@ public class cleanBuildFile {
 
         }
 
-        ArrayList<String> fileNames = new ArrayList<String>();
+       
 
         for (int i = 0; i < lowerCaseFiles.size() ; i++) {
             
@@ -328,14 +401,28 @@ public class cleanBuildFile {
             String temp = f.getName();
             fileNames.add(temp.toLowerCase());
         }
+        
         for (File file : arrfile) {
             if (file.isDirectory()) {
+
+                if (isAuraFolder(file)) {
+                    continue;
+                }
+
                 if (file.getName().startsWith(".")) continue;
                 cleanBuildFile.showFiles(file.listFiles());
                 continue;
             }
             
             if (fileNames.contains(file.getName().toLowerCase())) {
+                if (file.getName().contains(".report") && !file.getName().contains(".reportType")) {
+                    Integer x = file.getAbsolutePath().lastIndexOf("/reports/") + 1;
+                    Integer lastDot = file.getAbsolutePath().lastIndexOf(".");
+                    String fold = file.getAbsolutePath().substring(x, lastDot);
+                    reportMap.put(file.getName(), fold.replace("reports/",""));           
+
+                }
+                actualFiless.add(file.getName());
                 continue;
             }
             file.delete();
