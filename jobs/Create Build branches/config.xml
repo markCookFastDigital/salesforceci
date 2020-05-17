@@ -110,7 +110,7 @@
       <command>git merge --no-edit --no-commit -s recursive -Xtheirs origin/${destination}</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>node --max-old-space-size=4096 app.js origin/${feature} $(cat parentBranch.txt) origin/${destination} false</command>
+      <command>node --max-old-space-size=6144 app.js origin/${feature} $(cat parentBranch.txt) origin/${destination} false</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
       <command>git add src/* &amp;&amp; git commit -m &apos;Jenkins commit&apos;</command>
@@ -125,7 +125,7 @@
       <command>git checkout -B ${feature}-${destination}-Release</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>node --max-old-space-size=4096 app.js origin/${feature} $(cat parentBranch.txt) origin/${destination} true</command>
+      <command>node --max-old-space-size=6144 app.js origin/${feature} $(cat parentBranch.txt) origin/${destination} true</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
       <command>cp /var/jenkins_home/CI/cleanBuildFile.class . &amp;&amp; java cleanBuildFile yes </command>
