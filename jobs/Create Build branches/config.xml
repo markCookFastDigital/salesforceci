@@ -16,7 +16,7 @@
         <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@0.9.12">
           <name>feature</name>
           <description></description>
-          <uuid>c2294211-f5c4-4471-8809-38a8b5419c5a</uuid>
+          <uuid>a0eb9db4-1afa-49ea-b1ad-707539f955fe</uuid>
           <type>PT_BRANCH</type>
           <branch></branch>
           <tagFilter>*</tagFilter>
@@ -30,7 +30,7 @@
         <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@0.9.12">
           <name>parentBranch</name>
           <description>By Default, develop. The branch from which your &apos;feature&apos; branched off</description>
-          <uuid>a39232f3-37fd-4f99-a402-480b987e1fc9</uuid>
+          <uuid>01eb40b0-6efc-43b2-ba82-13eedae574ca</uuid>
           <type>PT_BRANCH</type>
           <branch></branch>
           <tagFilter>*</tagFilter>
@@ -44,7 +44,7 @@
         <net.uaznia.lukanus.hudson.plugins.gitparameter.GitParameterDefinition plugin="git-parameter@0.9.12">
           <name>destination</name>
           <description></description>
-          <uuid>79f67604-8052-469d-a67f-c260ecd5ef37</uuid>
+          <uuid>cd9699d2-5bd0-44c3-ac02-0ea566fce242</uuid>
           <type>PT_BRANCH</type>
           <branch></branch>
           <tagFilter>*</tagFilter>
@@ -104,7 +104,7 @@
       <command>git diff --name-only  $(cat parentBranch.txt) &gt; filesToIncludeInBuild.txt</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>git checkout -B ${feature}-${destination}-merge  &amp;&amp; echo ${feature}-${destination}-merge</command>
+      <command>git checkout -B ${feature}-${destination}-merge  &amp;&amp;  git status &gt; befStat.txt  &amp;&amp; echo ${feature}-${destination}-merge</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
       <command>git merge --no-edit --no-commit -s recursive -Xtheirs origin/${destination}</command>
@@ -137,6 +137,8 @@
       <command>git commit --quiet -am&apos; Creating Release &apos; &amp;&amp; git push -u origin HEAD</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
+      <command>rm -rf app.zip app.js node_modules destVersion* sourceVersion* BranchStartVersion* cleanBuild* package.json</command>
+    </hudson.tasks.Shell>
   </builders>
   <publishers/>
   <buildWrappers/>
