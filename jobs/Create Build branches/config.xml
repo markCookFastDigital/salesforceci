@@ -74,9 +74,7 @@
     <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
     <submoduleCfg class="list"/>
     <extensions>
-      <hudson.plugins.git.extensions.impl.CleanBeforeCheckout>
-        <deleteUntrackedNestedRepositories>false</deleteUntrackedNestedRepositories>
-      </hudson.plugins.git.extensions.impl.CleanBeforeCheckout>
+      <hudson.plugins.git.extensions.impl.WipeWorkspace/>
     </extensions>
   </scm>
   <canRoam>true</canRoam>
@@ -106,7 +104,7 @@
       <command>git diff --name-only  $(cat parentBranch.txt) &gt; filesToIncludeInBuild.txt</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>git checkout -B ${feature}-${destination}-merge  &amp;&amp;  echo &apos;*.DS_Store&apos; &gt; .gitIgnore &amp;&amp; echo ${feature}-${destination}-merge</command>
+      <command>git checkout -B ${feature}-${destination}-merge  &amp;&amp; echo ${feature}-${destination}-merge</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
       <command>git merge --no-edit --no-commit -s recursive -Xtheirs origin/${destination}</command>
@@ -136,8 +134,9 @@
       <command>mv package.xml src &amp;&amp; ls &amp;&amp; ls src &amp;&amp; git add src/package.xml</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>git commit -am&apos; Creating Release&apos; &amp;&amp; git push -u origin HEAD</command>
+      <command>git commit --quiet -am&apos; Creating Release &apos; &amp;&amp; git push -u origin HEAD</command>
     </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
   </builders>
   <publishers/>
   <buildWrappers/>
