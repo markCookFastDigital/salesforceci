@@ -1,0 +1,18 @@
+{
+  "name": "relevantelementchanges",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "^4.17.15",
+    "toposort": "^2.0.2",
+    "vkbeautify": "^0.99.3",
+    "xml-formatter": "^2.0.1",
+    "xml2json": "^0.12.0"
+  }
+}
