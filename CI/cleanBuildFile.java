@@ -248,6 +248,16 @@ public class cleanBuildFile {
             } else {
                 arrayList.add(str);
                 arrayList.add(str + "-meta.xml");
+
+                if (str.contains(".cls")) {
+                    arrayList.add(str + "_t");
+                    arrayList.add(str + "_T");
+                    arrayList.add(str + "_Test");
+                    arrayList.add(str + "_test");
+                    arrayList.add(str + "_test");
+                    arrayList.add(str + "test");
+                    arrayList.add(str + "Test");
+                }
             }
 
             
