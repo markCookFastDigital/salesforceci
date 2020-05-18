@@ -204,14 +204,14 @@ public class cleanBuildFile {
         }
     }
 
-    public static HashSet<String> auraFolders = new HashSet<String>();
+    public static HashMap<String, String> auraFolders = new HashMap<String,String>();
 
     public static boolean isAuraFolder(File aFile) {
         Boolean result = false;
         Integer lastSlash = aFile.getName().lastIndexOf("/");
         String folderName = aFile.getName().substring(lastSlash+1);
 
-        for (String s : auraFolders) {
+        for (String s : auraFolders.keySet()) {
 
             Integer lastSlash2 = s.lastIndexOf('/');
             String compFoldName = s.substring(lastSlash2 + 1);
@@ -227,7 +227,7 @@ public class cleanBuildFile {
     public static ArrayList<String> processAura(String theString , ArrayList<String> arrayList) {
         Integer slashIndex = theString.lastIndexOf('/');
         String foldName = theString.substring(0, slashIndex);
-        auraFolders.add(foldName);
+        auraFolders.put(foldName,foldName);
         arrayList.add(theString);
 
         return arrayList;
@@ -284,7 +284,11 @@ public class cleanBuildFile {
                     Element theElement = elementMap.get(theExtension);
                     Element newMember = doc.createElement("members");
                     if (theExtension.contains("report") && !theExtension.contains("reportType")) {
-                        newMember.appendChild(doc.createTextNode(reportMap.get(aFile)));
+                        if (reportMap.containsKey((aFile))) {
+                            newMember.appendChild(doc.createTextNode(reportMap.get(aFile)));
+                        }else {
+                            System.out.println("REPORT DOESNT HAVE FOLDER! " + aFile);
+                        }                        
                     } else {
                         newMember.appendChild(doc.createTextNode(removeExtension(aFile)));
 
@@ -304,8 +308,13 @@ public class cleanBuildFile {
                     theName.appendChild(doc.createTextNode(fileToMeta.get(theExtension)));
                     theElement.appendChild(theName);
                     Element newMember = doc.createElement("members");
-                    if (theExtension.contains("report")) {
-                        newMember.appendChild(doc.createTextNode(reportMap.get(aFile)));
+                    if (theExtension.contains("report") && !theExtension.contains("reportType")) {
+                        if (reportMap.containsKey((aFile))) {
+                            newMember.appendChild(doc.createTextNode(reportMap.get(aFile)));
+                    
+                        } else {
+                            System.out.println("REPORT DOESNT HAVE FOLDER! " + aFile);
+                        }
                     } else {
                         newMember.appendChild(doc.createTextNode(removeExtension(aFile)));
 
@@ -322,7 +331,7 @@ public class cleanBuildFile {
                 theName.appendChild(doc.createTextNode("AuraDefinitionBundle"));
                 theElement.appendChild(theName);
 
-                for (String aF : auraFolders) {
+                for (String aF : auraFolders.keySet()) {
                     Integer slashIndex = aF.lastIndexOf('/');
                     String name = aF.substring(slashIndex+1);
                     Element newMember = doc.createElement("members");
@@ -360,7 +369,6 @@ public class cleanBuildFile {
 
             // Output to console for testing
             // StreamResult result = new StreamResult(System.out);
-
             transformer.transform(source, result);
 
             System.out.println("PACKAGE.XML GENERATED");
@@ -369,6 +377,7 @@ public class cleanBuildFile {
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         } catch (TransformerException e) {
+            System.out.println(e.getMessage());
             e.printStackTrace();
         }
 

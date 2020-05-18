@@ -156,7 +156,7 @@ function processApps() {
       var toWrite = finalLines.join('\r\n')
       fs.writeFileSync(cf, toWrite)
       
-      console.log('Successfully wrote ' + obj)
+      console.log('Successfully wrote ' + cf)
     } 
   }
 
@@ -235,7 +235,7 @@ function processObjects() {
       var toWrite = finalLines.join('\r\n')
       fs.writeFileSync(cf, toWrite)
       
-      console.log('Successfully wrote ' + obj)
+      console.log('Successfully wrote ' + cf)
     } 
   }
 
@@ -260,7 +260,7 @@ function processLayouts() {
     var finalLines = [alwaysAdd,newLine].concat(lines.slice(2))
     var toWrite = finalLines.join('\r\n')
     fs.writeFileSync(cf, toWrite)
-    console.log('Successfully wrote ' + lay)
+    console.log('Successfully wrote ' + cf)
     } 
 
   }
@@ -284,7 +284,7 @@ function processFlexis() {
       var finalLines = [alwaysAdd,newLine].concat(lines.slice(2))
       var toWrite = finalLines.join('\r\n')
       fs.writeFileSync(cf, toWrite)
-      console.log('Successfully wrote ' + lay)
+      console.log('Successfully wrote ' + cf)
     } 
   }
 
