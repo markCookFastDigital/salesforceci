@@ -13,6 +13,24 @@ const mandatory = ['xmlns','allowInChatterGroups' ,'deploymentStatus' ,'descript
                   ,'nameField' ,'pluralLabel'  ,'recordTypeTrackFeedHistory' ,'recordTypeTrackHistory' ,'sharingModel' ,'visibility', 'sharingModel']
 
 
+var jsonOptions = {
+  object: false,
+  reversible: true,
+  coerce: false,
+  sanitize: false,
+  trim: true,
+  arrayNotation: false,
+  alternateTextNode: false
+};
+
+const x = '&quot;http://soap.sforce.com/2006/04/metadata&quot;'
+const x1 = '"http://soap.sforce.com/2006/04/metadata"'
+
+var xmloptions = {
+  sanitize: true,
+  ignoreNull: false
+};
+
 var objects = []
 var apps = []
 var finishedApps = []
@@ -142,8 +160,12 @@ function processApps() {
     if (!addedFiles.includes(cf) && !finishedApps.hasOwnProperty(cf)) {
       console.log('processing ' + cf)
       var fApp = processApp(cf);
-  
-      var xml = parser.toXml(JSON.stringify(fApp, null, 4))
+    
+      var jsonString = JSON.stringify(fApp, null, 4)
+      var xml = parser.toXml( jsonString ,xmloptions).replace(/[']/g, '&apos;')
+      xml = xml.replace(/["]/g, '&quot;')
+      xml = xml.replace(x, x1)
+      
 
       var formattedXML = beut.xml(xml, 4);
       var lines = formattedXML.split(splitter)
@@ -156,7 +178,7 @@ function processApps() {
       var toWrite = finalLines.join('\r\n')
       fs.writeFileSync(cf, toWrite)
       
-      console.log('Successfully wrote ' + cf)
+      console.log('Successfully wrote ' + obj)
     } 
   }
 
@@ -170,22 +192,22 @@ function processApp(appFile) {
   var curr = './'
 
   // rawSource = fs.readFileSync( curr+appFile, 'utf8')
-  // sourceJson = JSON.parse(parser.toJson(rawSource, {reversible: true}));
+  // sourceJson = JSON.parse(parser.toJson(rawSource, jsonOptions));
 
   execSync('git show ' + gitBranchName + ':'+appFile + ' > ' + sourcePath)
   rawSource = fs.readFileSync(curr+sourcePath, 'utf8')
-  sourceJson = JSON.parse(parser.toJson(rawSource, {reversible: true}));
+  sourceJson = JSON.parse(parser.toJson(rawSource, jsonOptions));
   // console.log(sourceJson)
   var version = 'dest'
   try {
   execSync('git show ' + destinationBranch + ':'+appFile + ' > ' + destPath)
   rawDest = fs.readFileSync(curr+destPath, 'utf8')
-  destJson = JSON.parse(parser.toJson(rawDest, {reversible: true}));
+  destJson = JSON.parse(parser.toJson(rawDest, jsonOptions));
 
   version = 'parent'
   execSync('git show '+ gitParentCommit + ':' + appFile + ' > ' + startPath)
   rawBranchStart = fs.readFileSync(curr+startPath, 'utf8')
-  branchStartJson = JSON.parse(parser.toJson(rawBranchStart, {reversible: true}));
+  branchStartJson = JSON.parse(parser.toJson(rawBranchStart, jsonOptions));
 
  } catch (err) {
     console.error('File not found - '+version+':' + appFile)
@@ -221,8 +243,13 @@ function processObjects() {
       // finishedObjects[cf] = processObject(cf);
 
       var obj = processObject(cf);
-      var xml = parser.toXml(JSON.stringify(obj, null, 4))
-      
+
+      var jsonString = JSON.stringify(obj, null, 4)
+      var xml = parser.toXml( jsonString ,xmloptions).replace(/[']/g, '&apos;')
+      xml = xml.replace(/["]/g, '&quot;')
+      xml = xml.replace(x, x1)
+
+
 
       var formattedXML = beut.xml(xml, 4);
       var lines = formattedXML.split(splitter)
@@ -247,8 +274,11 @@ function processLayouts() {
       console.log('processing ' + cf)
       var fLayout = processLayout(cf);
 
+    var jsonString = JSON.stringify(fLayout, null, 4)
+    var xml = parser.toXml( jsonString ,xmloptions).replace(/[']/g, '&apos;')
+    xml = xml.replace(/["]/g, '&quot;')
+    xml = xml.replace(x, x1)
 
-    var xml = parser.toXml(JSON.stringify(fLayout, null, 4))
     var formattedXML = beut.xml(xml, 4);
 
     var lines = formattedXML.split(splitter)
@@ -272,7 +302,12 @@ function processFlexis() {
     if (!addedFiles.includes(cf) && !finishedFlexiPages.hasOwnProperty(cf)) {
       console.log('processing ' + cf)
       var rFlexi = processFlexi(cf);
-      var xml = parser.toXml(JSON.stringify(rFlexi, null, 4))
+
+      var jsonString = JSON.stringify(rFlexi, null, 4)
+      var xml = parser.toXml( jsonString ,xmloptions).replace(/[']/g, '&apos;')
+      xml = xml.replace(/["]/g, '&quot;')
+      xml = xml.replace(x, x1)
+
       var formattedXML = beut.xml(xml, 4);
 
       var lines = formattedXML.split(splitter)
@@ -300,10 +335,10 @@ function processFlexi(flexiFile) {
 
 
   // rawSource = fs.readFileSync( curr+objectFile, 'utf8')
-  // sourceJson = JSON.parse(parser.toJson(rawSource, {reversible: true}));
+  // sourceJson = JSON.parse(parser.toJson(rawSource, jsonOptions));
   execSync('git show ' + gitBranchName + ':"'+flexiFile + '" > ' + sourcePath)
   rawSource = fs.readFileSync(curr+sourcePath, 'utf8')
-  sourceJson = JSON.parse(parser.toJson(rawSource, {reversible: true}));
+  sourceJson = JSON.parse(parser.toJson(rawSource, jsonOptions));
 
   delete rawSource
 
@@ -311,7 +346,7 @@ function processFlexi(flexiFile) {
   try {
     execSync('git show ' + destinationBranch + ':"'+flexiFile + '" > ' + destPath)
     rawDest = fs.readFileSync(curr+destPath, 'utf8')
-    destJson = JSON.parse(parser.toJson(rawDest, {reversible: true}));
+    destJson = JSON.parse(parser.toJson(rawDest, jsonOptions));
 
     delete rawDest
 
@@ -319,7 +354,7 @@ function processFlexi(flexiFile) {
 
     execSync('git show '+ gitParentCommit + ':"' + flexiFile + '" > ' + startPath)
     rawBranchStart = fs.readFileSync(curr+startPath, 'utf8')
-    branchStartJson = JSON.parse(parser.toJson(rawBranchStart, {reversible: true}));
+    branchStartJson = JSON.parse(parser.toJson(rawBranchStart, jsonOptions));
 
     delete rawBranchStart
 
@@ -346,10 +381,10 @@ function processLayout(layoutFile) {
 
 
   // rawSource = fs.readFileSync( curr+objectFile, 'utf8')
-  // sourceJson = JSON.parse(parser.toJson(rawSource, {reversible: true}));
+  // sourceJson = JSON.parse(parser.toJson(rawSource, jsonOptions));
   execSync('git show ' + gitBranchName + ':"'+layoutFile + '" > ' + sourcePath)
   rawSource = fs.readFileSync(curr+sourcePath, 'utf8')
-  sourceJson = JSON.parse(parser.toJson(rawSource, {reversible: true}));
+  sourceJson = JSON.parse(parser.toJson(rawSource, jsonOptions));
 
   delete rawSource
 
@@ -359,7 +394,7 @@ function processLayout(layoutFile) {
 
     execSync('git show ' + destinationBranch + ':"'+layoutFile + '" > ' + destPath)
     rawDest = fs.readFileSync(curr+destPath, 'utf8')
-    destJson = JSON.parse(parser.toJson(rawDest, {reversible: true}));
+    destJson = JSON.parse(parser.toJson(rawDest, jsonOptions));
     
     delete rawDest
 
@@ -367,7 +402,7 @@ function processLayout(layoutFile) {
 
     execSync('git show '+ gitParentCommit + ':"' + layoutFile + '" > ' + startPath)
     rawBranchStart = fs.readFileSync(curr+startPath, 'utf8')
-    branchStartJson = JSON.parse(parser.toJson(rawBranchStart, {reversible: true}));
+    branchStartJson = JSON.parse(parser.toJson(rawBranchStart, jsonOptions));
 
     delete rawBranchStart
 
@@ -392,11 +427,11 @@ function processObject(objectFile) {
   var sourcePath = 'sourceVersion.object'
   var curr = './'
   // rawSource = fs.readFileSync( curr+objectFile, 'utf8')
-  // sourceJson = JSON.parse(parser.toJson(rawSource, {reversible: true}));
+  // sourceJson = JSON.parse(parser.toJson(rawSource, jsonOptions));
 
   execSync('git show ' + gitBranchName + ':'+objectFile + ' > ' + sourcePath)
   rawSource = fs.readFileSync(curr+sourcePath, 'utf8')
-  sourceJson = JSON.parse(parser.toJson(rawSource, {reversible: true}));
+  sourceJson = JSON.parse(parser.toJson(rawSource, jsonOptions));
   // console.log(sourceJson)
 
   delete rawSource
@@ -407,7 +442,7 @@ function processObject(objectFile) {
   try {
   execSync('git show ' + destinationBranch + ':'+objectFile + ' > ' + destPath)
   rawDest = fs.readFileSync(curr+destPath, 'utf8')
-  destJson = JSON.parse(parser.toJson(rawDest, {reversible: true}));
+  destJson = JSON.parse(parser.toJson(rawDest, jsonOptions));
 
   delete rawDest
 
@@ -415,7 +450,7 @@ function processObject(objectFile) {
 
   execSync('git show '+ gitParentCommit + ':' + objectFile + ' > ' + startPath)
   rawBranchStart = fs.readFileSync(curr+startPath, 'utf8')
-  branchStartJson = JSON.parse(parser.toJson(rawBranchStart, {reversible: true}));
+  branchStartJson = JSON.parse(parser.toJson(rawBranchStart, jsonOptions));
 
   delete rawBranchStart
 
@@ -3504,7 +3539,10 @@ function buildMerge(source, start, dest) {
           continue;
         } else if (presentAtStart == false && presentAtDest == true) {
           if (differentToDest == true ) {
-            // 2 way merge? 
+            if (changedDuringBranch == true) {
+              sourceObject = mergeElementHandler(sourceObject, {}, destObject, regKey);
+
+            }
           }
         } else if (presentAtStart == true && presentAtDest == false) {
             if (changedDuringBranch == false) {

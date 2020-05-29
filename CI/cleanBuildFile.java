@@ -250,13 +250,16 @@ public class cleanBuildFile {
                 arrayList.add(str + "-meta.xml");
 
                 if (str.contains(".cls")) {
-                    arrayList.add(str + "_t");
-                    arrayList.add(str + "_T");
-                    arrayList.add(str + "_Test");
-                    arrayList.add(str + "_test");
-                    arrayList.add(str + "_test");
-                    arrayList.add(str + "test");
-                    arrayList.add(str + "Test");
+                    Integer dotPlace = str.indexOf(".");
+                    String fileName = str.substring(0, dotPlace - 1);
+
+                    arrayList.add(fileName + "_t.cls");
+                    arrayList.add(fileName + "_T.cls");
+                    arrayList.add(fileName + "_Test.cls");
+                    arrayList.add(fileName + "_test.cls");
+                    arrayList.add(fileName + "_test.cls");
+                    arrayList.add(fileName + "test.cls");
+                    arrayList.add(fileName + "Test.cls");
                 }
             }
 
@@ -366,7 +369,7 @@ public class cleanBuildFile {
             }
 
             Element version = doc.createElement("version");
-            version.appendChild(doc.createTextNode("36.0"));
+            version.appendChild(doc.createTextNode("47.0"));
             rootElement.appendChild(version);
 
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
