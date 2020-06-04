@@ -11,7 +11,7 @@ USER root
 # RUN tar xJf sfdx-linux-amd64.tar.xz -C sfdx-cli --strip-components 1
 # RUN ./sfdx-cli/install
 RUN apt-get update
-RUN apt-get install -y apt-transport-https git-core curl build-essential openssl libssl-dev git
+RUN apt-get install -y apt-transport-https git-core curl build-essential openssl libssl-dev git ant
 RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
 RUN apt-get install -y nodejs 
 
