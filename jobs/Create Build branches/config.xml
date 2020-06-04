@@ -62,8 +62,8 @@
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
-        <url>git@github.com:dsl12/smartcloudGenerationDemo.git</url>
-        <credentialsId>f02e7e59-47c8-4102-912e-a3eb89713169</credentialsId>
+        <url>git@ssh.dev.azure.com:v3/Generation-Salesforce/Salesforce/Salesforce</url>
+        <credentialsId>dslJenkins</credentialsId>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
@@ -104,34 +104,37 @@
       <command>git diff --name-only  $(cat parentBranch.txt) &gt; filesToIncludeInBuild.txt</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>git checkout -B ${feature}-${destination}-merge  &amp;&amp;  git status &gt; befStat.txt  &amp;&amp; echo ${feature}-${destination}-merge</command>
+      <command>git checkout -B ${feature}-${destination}-merge  &amp;&amp; echo ${feature}-${destination}-merge </command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>git push -u origin HEAD &amp;&amp; git status</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
       <command>git merge --no-edit --no-commit -s recursive -Xtheirs origin/${destination}</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>node --max-old-space-size=6144 app.js origin/${feature} $(cat parentBranch.txt) origin/${destination} false</command>
+      <command>node --max-old-space-size=4096 app.js origin/${feature} $(cat parentBranch.txt) origin/${destination} false</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>git add src/* &amp;&amp; git commit -m &apos;Jenkins commit&apos;</command>
+      <command>git add src/* &amp;&amp; git commit -m &apos;Merge commit&apos;</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>echo &apos;git remote set-url origin https://dsl12@github.com/dsl12/smartcloudGenerationDemo.git&apos;</command>
-    </hudson.tasks.Shell>
-    <hudson.tasks.Shell>
-      <command>git push -u origin HEAD</command>
+      <command>git push </command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
       <command>git checkout -B ${feature}-${destination}-Release</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>node --max-old-space-size=6144 app.js origin/${feature} $(cat parentBranch.txt) origin/${destination} true</command>
+      <command>node --max-old-space-size=4096 app.js origin/${feature} $(cat parentBranch.txt) origin/${destination} true</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>cp /var/jenkins_home/CI/cleanBuildFile.class . &amp;&amp; java cleanBuildFile yes </command>
+      <command>cp /var/jenkins_home/CI/cleanBuildFile.class .</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>mv package.xml src &amp;&amp; ls &amp;&amp; ls src &amp;&amp; git add src/package.xml</command>
+      <command>java cleanBuildFile </command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>mv package.xml src &amp;&amp; git add src/package.xml</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
       <command>git commit --quiet -am&apos; Creating Release &apos; &amp;&amp; git push -u origin HEAD</command>
