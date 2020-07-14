@@ -243,7 +243,7 @@ public class cleanBuildFile {
 
             if (str.length() == 0) continue;
 
-            if (str.contains("/aura/")) {
+            if (str.contains("aura/")) {
                 arrayList = processAura(str,arrayList);
             } else {
                 arrayList.add(str);
